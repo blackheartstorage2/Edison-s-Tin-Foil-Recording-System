@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tin Foil Phonograph Virtual Build</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .instructions {
+      margin: 20px auto;
+      text-align: center;
+    }
+    .image-grid, .build-area {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 30px;
+      min-height: 150px;
+      padding: 10px;
+      border: 2px dashed #ccc;
+      background: #fff;
+    }
+    .image-grid img, .build-area img {
+      width: 100px;
+      height: auto;
+      cursor: grab;
+    }
+    .audio-controls {
+      text-align: center;
+      margin-top: 40px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Build Edison's Tin Foil Recorder</h1>
+  <div class="instructions">
+    <p>Drag the parts from the grid below into the build area to assemble the device in the correct order (see your instructions). When complete, use the audio recorder below to simulate playback.</p>
+  </div>
+
+  <h2 style="text-align:center;">Parts</h2>
+  <div class="image-grid" id="imageGrid">
+    <!-- Images 001 to 021 -->
+    <!-- You can replace src with the actual URLs later -->
+    <script>
+      for (let i = 1; i <= 21; i++) {
+        let img = document.createElement('img');
+        let num = String(i).padStart(3, '0');
+        img.src = num + '.jpg';
+        img.alt = 'Part ' + num;
+        img.draggable = true;
+        img.addEventListener('dragstart', dragStart);
+        document.getElementById('imageGrid').appendChild(img);
+      }
+    </script>
+  </div>
+
+  <h2 style="text-align:center;">Build Area</h2>
+  <div class="build-area" id="buildArea" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+  <div class="audio-controls">
+    <h2>Audio Recorder</h2>
+    <button onclick="startRecording()">Start Recording</button>
+    <button onclick="stopRecording()">Stop Recording</button>
+    <button onclick="playRecording()">Play Recording</button>
+    <p><small>(Browser must support MediaRecorder — use Chrome or Firefox)</small></p>
+    <audio id="audioPlayback" controls></audio>
+  </div>
+
+  <script>
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+
+    function dragStart(ev) {
+      ev.dataTransfer.setData("text/plain", ev.target.src);
+    }
+
+    function drop(ev) {
+      ev.preventDefault();
+      const src = ev.dataTransfer.getData("text/plain");
+      const img = document.createElement("img");
+      img.src = src;
+      img.style.width = "100px";
+      ev.target.appendChild(img);
+    }
+
+    // Audio recording logic
+    let mediaRecorder;
+    let audioChunks = [];
+
+    async function startRecording() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+
+      mediaRecorder.ondataavailable = event => {
+        audioChunks.push(event.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        const url = URL.createObjectURL(blob);
+        document.getElementById('audioPlayback').src = url;
+      };
+
+      mediaRecorder.start();
+      console.log("Recording started");
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+        console.log("Recording stopped");
+      }
+    }
+
+    function playRecording() {
+      const audio = document.getElementById('audioPlayback');
+      audio.play();
+    }
+  </script>
+
+</body>
+</html>
