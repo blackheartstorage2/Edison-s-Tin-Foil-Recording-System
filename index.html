@@ -16,34 +16,46 @@
       margin: 20px auto;
       text-align: center;
     }
-    .image-grid, .build-area {
+    .image-grid {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
       justify-content: center;
       margin-bottom: 30px;
-      min-height: 150px;
       padding: 10px;
       border: 2px dashed #ccc;
       background: #fff;
     }
-    .image-grid img, .build-area img {
+    .image-grid img {
       width: 100px;
       height: auto;
       cursor: grab;
     }
-    .image-grid div, .build-area div {
-      text-align: center;
-      width: 110px;
+
+    /* Build area is relative container for layering */
+    #buildArea {
+      position: relative;
+      width: 500px;  /* Adjust as needed */
+      height: 350px; /* Adjust as needed */
+      margin: 0 auto 40px auto;
+      border: 2px dashed #ccc;
+      background: #fff;
       user-select: none;
     }
-    .image-grid div div, .build-area div div {
-      font-weight: bold;
-      margin-top: 4px;
+    #buildArea img {
+      position: absolute;
+      width: 100px;
+      height: auto;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    #buildArea img:hover {
+      transform: scale(1.1);
+      z-index: 10;
     }
     .audio-controls {
       text-align: center;
-      margin-top: 40px;
+      margin-top: 20px;
     }
     button {
       padding: 10px 20px;
@@ -58,18 +70,38 @@
   <h1>Build Edison's Tin Foil Recorder</h1>
 
   <div class="instructions">
-    <p>Drag the parts from the grid below into the build area to assemble the device in the correct order (see your instructions). When complete, use the audio recorder below to simulate playback. You can remove parts by clicking them in the build area.</p>
+    <p>Drag the parts from the grid below into the build area to assemble the device in the correct order (see your instructions). Click a part in the build area to remove it and return it to the parts grid.</p>
   </div>
 
   <h2 style="text-align:center;">Parts</h2>
-  <div class="image-grid" id="imageGrid"></div>
+  <div class="image-grid" id="imageGrid">
+    <script>
+      // List all image filenames including lettered ones
+      const partFiles = [
+        '0000D_.jpg', '0000B.jpg', '0000C.jpg', '0000A_.jpg',  // reordered A & D as requested
+        '00003.jpg', '00004.jpg', '00005.jpg', '00006.jpg', '00007.jpg', '00008.jpg', '00009.jpg',
+        '00010.jpg', '00011.jpg', '00012.jpg', '00013.jpg', '00014.jpg', '00015.jpg',
+        '00016.jpg', '00017.jpg', '00018.jpg', '00019.jpg', '00020.jpg', '00021.jpg',
+        '00022.jpg', '00023.jpg', '00024.jpg'  // includes 24 for 0000E.jpg, and 25 was removed as requested
+      ];
+
+      const imageGrid = document.getElementById('imageGrid');
+
+      // Create img elements for parts grid
+      partFiles.forEach(filename => {
+        const img = document.createElement('img');
+        img.src = filename;
+        img.alt = filename;
+        img.draggable = true;
+        img.title = filename;
+        img.addEventListener('dragstart', dragStart);
+        imageGrid.appendChild(img);
+      });
+    </script>
+  </div>
 
   <h2 style="text-align:center;">Build Area</h2>
-  <div class="build-area" id="buildArea" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-
-  <div style="text-align:center;">
-    <button id="buildBtn">Build</button>
-  </div>
+  <div id="buildArea" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
 
   <div class="audio-controls">
     <h2>Audio Recorder</h2>
@@ -80,182 +112,126 @@
     <audio id="audioPlayback" controls></audio>
   </div>
 
-  <script>
-    // Images list (with D and A swapped, no final image 25 here)
-    const images = [
-      '0000D_.jpg', // A
-      '0000B.jpg',  // B
-      '0000C.jpg',  // C
-      '0000A_.jpg', // D
-      '00003.jpg',  // 3
-      '00004.jpg',  // 4
-      '00005.jpg',  // 5
-      '00006.jpg',  // 6
-      '00007.jpg',  // 7
-      '00008.jpg',  // 8
-      '00009.jpg',  // 9
-      '00010.jpg',  // 10
-      '00011.jpg',  // 11
-      '00012.jpg',  // 12
-      '00013.jpg',  // 13
-      '00014.jpg',  // 14
-      '00015.jpg',  // 15
-      '00016.jpg',  // 16
-      '00017.jpg',  // 17
-      '00018.jpg',  // 18
-      '00019.jpg',  // 19
-      '00020.jpg',  // 20
-      '00021.jpg',  // 21
-      '0000E.jpg'   // 24 (horn)
-    ];
+<script>
+  // Positions for each part image inside buildArea
+  // You should adjust top/left px values to match your visual layout
+  const partPositions = {
+    '0000D_.jpg': { top: 230, left: 50 },
+    '0000B.jpg': { top: 170, left: 130 },
+    '0000C.jpg': { top: 140, left: 210 },
+    '0000A_.jpg': { top: 90, left: 290 },
+    '00003.jpg': { top: 130, left: 340 },
+    '00004.jpg': { top: 130, left: 420 },
+    '00005.jpg': { top: 120, left: 490 },
+    '00006.jpg': { top: 100, left: 560 },
+    '00007.jpg': { top: 110, left: 630 },
+    '00008.jpg': { top: 120, left: 700 },
+    '00009.jpg': { top: 120, left: 770 },
+    '00010.jpg': { top: 150, left: 840 },
+    '00011.jpg': { top: 160, left: 910 },
+    '00012.jpg': { top: 180, left: 980 },
+    '00013.jpg': { top: 180, left: 1050 },
+    '00014.jpg': { top: 190, left: 1120 },
+    '00015.jpg': { top: 190, left: 1190 },
+    '00016.jpg': { top: 220, left: 1260 },
+    '00017.jpg': { top: 230, left: 1330 },
+    '00018.jpg': { top: 240, left: 1400 },
+    '00019.jpg': { top: 250, left: 1470 },
+    '00020.jpg': { top: 260, left: 1540 },
+    '00021.jpg': { top: 270, left: 1610 },
+    '00022.jpg': { top: 280, left: 1680 },
+    '00023.jpg': { top: 290, left: 1750 },
+    '00024.jpg': { top: 50, left: 200 } // example position for 0000E.jpg
+  };
 
-    // Labels for images
-    const labels = [
-      'A', 'B', 'C', 'D',
-      '3', '4', '5', '6', '7', '8', '9',
-      '10', '11', '12', '13', '14', '15', '16',
-      '17', '18', '19', '20', '21', '24'
-    ];
+  const buildArea = document.getElementById('buildArea');
+  const imageGrid = document.getElementById('imageGrid');
 
-    const imageGrid = document.getElementById('imageGrid');
-    const buildArea = document.getElementById('buildArea');
-    const buildBtn = document.getElementById('buildBtn');
+  function allowDrop(ev) {
+    ev.preventDefault();
+  }
 
-    // Helper: create image container with label
-    function createImageContainer(src, label) {
-      const container = document.createElement('div');
-      container.style.textAlign = 'center';
-      container.style.width = '110px';
-      container.style.userSelect = 'none';
+  function dragStart(ev) {
+    ev.dataTransfer.setData("text/plain", ev.target.src);
+  }
 
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = 'Part ' + label;
-      img.draggable = true;
+  function drop(ev) {
+    ev.preventDefault();
+    const src = ev.dataTransfer.getData("text/plain");
+    const filename = src.split('/').pop();
 
-      // Add dragstart for grid images
-      img.addEventListener('dragstart', dragStart);
+    // Prevent adding duplicate parts
+    if (buildArea.querySelector(`img[src$="${filename}"]`)) return;
 
-      const labelEl = document.createElement('div');
-      labelEl.textContent = label;
-      labelEl.style.fontWeight = 'bold';
-      labelEl.style.marginTop = '4px';
+    // Find img element in grid and remove it (to simulate move)
+    const gridImg = Array.from(imageGrid.querySelectorAll('img')).find(img => img.src.endsWith(filename));
+    if (gridImg) gridImg.remove();
 
-      container.appendChild(img);
-      container.appendChild(labelEl);
-
-      return container;
+    // Create positioned img for buildArea
+    const pos = partPositions[filename];
+    if (!pos) {
+      alert(`No position set for part: ${filename}`);
+      return;
     }
 
-    // Load images into parts grid initially
-    function loadPartsGrid() {
-      imageGrid.innerHTML = '';
-      for (let i = 0; i < images.length; i++) {
-        const src = images[i];
-        const label = labels[i];
-        const container = createImageContainer(src, label);
-        imageGrid.appendChild(container);
-      }
-    }
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = filename;
+    img.title = filename;
+    img.style.top = pos.top + 'px';
+    img.style.left = pos.left + 'px';
 
-    // Drag and drop handlers
-    function allowDrop(ev) {
-      ev.preventDefault();
-    }
-
-    function dragStart(ev) {
-      ev.dataTransfer.setData("text/plain", ev.target.src);
-    }
-
-    function drop(ev) {
-      ev.preventDefault();
-      const src = ev.dataTransfer.getData("text/plain");
-
-      // Prevent duplicates in build area:
-      // Check if image already in build area by src
-      const imgs = buildArea.querySelectorAll('img');
-      for (const img of imgs) {
-        if (img.src === src) return; // Already added, ignore drop
-      }
-
-      // Remove from parts grid:
-      const partsImgs = imageGrid.querySelectorAll('img');
-      for (const img of partsImgs) {
-        if (img.src === src) {
-          img.parentElement.remove();
-          break;
-        }
-      }
-
-      // Add to build area container with label
-      const labelIndex = images.findIndex(name => src.endsWith(name));
-      const label = labelIndex !== -1 ? labels[labelIndex] : '';
-      const container = createImageContainer(src, label);
-
-      // Add removal on click in build area:
-      container.querySelector('img').style.cursor = 'pointer';
-      container.addEventListener('click', () => {
-        // Remove from build area
-        buildArea.removeChild(container);
-        // Add back to parts grid
-        imageGrid.appendChild(createImageContainer(src, label));
-      });
-
-      buildArea.appendChild(container);
-    }
-
-    // Build button handler - show final image replacing build area
-    buildBtn.addEventListener('click', () => {
-      buildArea.innerHTML = ''; // clear build area
-
-      const finalImg = document.createElement('img');
-      finalImg.src = '0000F.jpg'; // final completed image
-      finalImg.alt = 'Final Built Tin Foil Recorder';
-      finalImg.style.width = '300px';
-      finalImg.style.display = 'block';
-      finalImg.style.margin = '0 auto';
-
-      buildArea.appendChild(finalImg);
+    // Clicking on image removes it from build and puts it back to parts grid
+    img.addEventListener('click', () => {
+      img.remove();
+      // Re-add to parts grid
+      const newGridImg = document.createElement('img');
+      newGridImg.src = filename;
+      newGridImg.alt = filename;
+      newGridImg.title = filename;
+      newGridImg.draggable = true;
+      newGridImg.addEventListener('dragstart', dragStart);
+      imageGrid.appendChild(newGridImg);
     });
 
-    // Initialize parts grid on load
-    loadPartsGrid();
+    buildArea.appendChild(img);
+  }
 
-    // Audio recording logic (unchanged)
-    let mediaRecorder;
-    let audioChunks = [];
+  // Audio recording logic
+  let mediaRecorder;
+  let audioChunks = [];
 
-    async function startRecording() {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder = new MediaRecorder(stream);
-      audioChunks = [];
+  async function startRecording() {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
 
-      mediaRecorder.ondataavailable = event => {
-        audioChunks.push(event.data);
-      };
+    mediaRecorder.ondataavailable = event => {
+      audioChunks.push(event.data);
+    };
 
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(audioChunks, { type: 'audio/webm' });
-        const url = URL.createObjectURL(blob);
-        document.getElementById('audioPlayback').src = url;
-      };
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      const url = URL.createObjectURL(blob);
+      document.getElementById('audioPlayback').src = url;
+    };
 
-      mediaRecorder.start();
-      console.log("Recording started");
+    mediaRecorder.start();
+    console.log("Recording started");
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      mediaRecorder.stop();
+      console.log("Recording stopped");
     }
+  }
 
-    function stopRecording() {
-      if (mediaRecorder && mediaRecorder.state !== "inactive") {
-        mediaRecorder.stop();
-        console.log("Recording stopped");
-      }
-    }
-
-    function playRecording() {
-      const audio = document.getElementById('audioPlayback');
-      audio.play();
-    }
-  </script>
+  function playRecording() {
+    const audio = document.getElementById('audioPlayback');
+    audio.play();
+  }
+</script>
 
 </body>
 </html>
