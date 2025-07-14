@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Tin Foil Phonograph Virtual Build</title>
   <style>
     body {
@@ -57,8 +57,8 @@
     <script>
       for (let i = 1; i <= 21; i++) {
         let img = document.createElement('img');
-        let num = String(i).padStart(5, '0'); // 00001 to 00021
-        img.src = num + '.jpg'; // Images in the same directory
+        let num = String(i).padStart(5, '0'); // Pads 1 to 00001, 2 to 00002, etc.
+        img.src = num + '.jpg';                // Loads e.g. "00001.jpg" from same folder
         img.alt = 'Part ' + num;
         img.draggable = true;
         img.addEventListener('dragstart', dragStart);
@@ -135,5 +135,3 @@
 
 </body>
 </html>
-
-
