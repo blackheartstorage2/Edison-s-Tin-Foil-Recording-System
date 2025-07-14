@@ -27,18 +27,19 @@
       border: 2px dashed #ccc;
       background: #fff;
     }
-    .image-item {
-      text-align: center;
-    }
-    .image-item img {
+    .image-grid img, .build-area img {
       width: 100px;
       height: auto;
       cursor: grab;
     }
-    .image-item span {
-      display: block;
-      margin-top: 4px;
+    .image-grid div, .build-area div {
+      text-align: center;
+      width: 110px;
+      user-select: none;
+    }
+    .image-grid div div, .build-area div div {
       font-weight: bold;
+      margin-top: 4px;
     }
     .audio-controls {
       text-align: center;
@@ -57,7 +58,7 @@
   <h1>Build Edison's Tin Foil Recorder</h1>
 
   <div class="instructions">
-    <p>Drag the parts from the grid below into the build area to assemble the device in the correct order (see your instructions). When complete, use the audio recorder below to simulate playback.</p>
+    <p>Drag the parts from the grid below into the build area to assemble the device in the correct order (see your instructions). When complete, use the audio recorder below to simulate playback. You can remove parts by clicking them in the build area.</p>
   </div>
 
   <h2 style="text-align:center;">Parts</h2>
@@ -65,6 +66,10 @@
 
   <h2 style="text-align:center;">Build Area</h2>
   <div class="build-area" id="buildArea" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+  <div style="text-align:center;">
+    <button id="buildBtn">Build</button>
+  </div>
 
   <div class="audio-controls">
     <h2>Audio Recorder</h2>
@@ -76,58 +81,84 @@
   </div>
 
   <script>
-    const imageList = [
-      { file: '0000A_.jpg', label: 'A' },
-      { file: '0000B.jpg', label: 'B' },
-      { file: '0000C.jpg', label: 'C' },
-      { file: '0000D_.jpg', label: 'D' },
-      { file: '00001.jpg', label: '1' },
-      { file: '00002.jpg', label: '2' },
-      { file: '00003.jpg', label: '3' },
-      { file: '00004.jpg', label: '4' },
-      { file: '00005.jpg', label: '5' },
-      { file: '00006.jpg', label: '6' },
-      { file: '00007.jpg', label: '7' },
-      { file: '00008.jpg', label: '8' },
-      { file: '00009.jpg', label: '9' },
-      { file: '00010.jpg', label: '10' },
-      { file: '00011.jpg', label: '11' },
-      { file: '00012.jpg', label: '12' },
-      { file: '00013.jpg', label: '13' },
-      { file: '00014.jpg', label: '14' },
-      { file: '00015.jpg', label: '15' },
-      { file: '00016.jpg', label: '16' },
-      { file: '00017.jpg', label: '17' },
-      { file: '00018.jpg', label: '18' },
-      { file: '00019.jpg', label: '19' },
-      { file: '00020.jpg', label: '20' },
-      { file: '00021.jpg', label: '21' },
-      { file: '00022.jpg', label: '22' },
-      { file: '00023.jpg', label: '23' },
-      { file: '0000E.jpg', label: 'E' },
-      { file: '0000F.jpg', label: 'F' }
+    // Images list (with D and A swapped, no final image 25 here)
+    const images = [
+      '0000D_.jpg', // A
+      '0000B.jpg',  // B
+      '0000C.jpg',  // C
+      '0000A_.jpg', // D
+      '00003.jpg',  // 3
+      '00004.jpg',  // 4
+      '00005.jpg',  // 5
+      '00006.jpg',  // 6
+      '00007.jpg',  // 7
+      '00008.jpg',  // 8
+      '00009.jpg',  // 9
+      '00010.jpg',  // 10
+      '00011.jpg',  // 11
+      '00012.jpg',  // 12
+      '00013.jpg',  // 13
+      '00014.jpg',  // 14
+      '00015.jpg',  // 15
+      '00016.jpg',  // 16
+      '00017.jpg',  // 17
+      '00018.jpg',  // 18
+      '00019.jpg',  // 19
+      '00020.jpg',  // 20
+      '00021.jpg',  // 21
+      '0000E.jpg'   // 24 (horn)
+    ];
+
+    // Labels for images
+    const labels = [
+      'A', 'B', 'C', 'D',
+      '3', '4', '5', '6', '7', '8', '9',
+      '10', '11', '12', '13', '14', '15', '16',
+      '17', '18', '19', '20', '21', '24'
     ];
 
     const imageGrid = document.getElementById('imageGrid');
+    const buildArea = document.getElementById('buildArea');
+    const buildBtn = document.getElementById('buildBtn');
 
-    imageList.forEach(({ file, label }) => {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'image-item';
+    // Helper: create image container with label
+    function createImageContainer(src, label) {
+      const container = document.createElement('div');
+      container.style.textAlign = 'center';
+      container.style.width = '110px';
+      container.style.userSelect = 'none';
 
       const img = document.createElement('img');
-      img.src = file;
+      img.src = src;
       img.alt = 'Part ' + label;
       img.draggable = true;
+
+      // Add dragstart for grid images
       img.addEventListener('dragstart', dragStart);
 
-      const caption = document.createElement('span');
-      caption.textContent = label;
+      const labelEl = document.createElement('div');
+      labelEl.textContent = label;
+      labelEl.style.fontWeight = 'bold';
+      labelEl.style.marginTop = '4px';
 
-      wrapper.appendChild(img);
-      wrapper.appendChild(caption);
-      imageGrid.appendChild(wrapper);
-    });
+      container.appendChild(img);
+      container.appendChild(labelEl);
 
+      return container;
+    }
+
+    // Load images into parts grid initially
+    function loadPartsGrid() {
+      imageGrid.innerHTML = '';
+      for (let i = 0; i < images.length; i++) {
+        const src = images[i];
+        const label = labels[i];
+        const container = createImageContainer(src, label);
+        imageGrid.appendChild(container);
+      }
+    }
+
+    // Drag and drop handlers
     function allowDrop(ev) {
       ev.preventDefault();
     }
@@ -139,13 +170,58 @@
     function drop(ev) {
       ev.preventDefault();
       const src = ev.dataTransfer.getData("text/plain");
-      const img = document.createElement("img");
-      img.src = src;
-      img.style.width = "100px";
-      ev.target.appendChild(img);
+
+      // Prevent duplicates in build area:
+      // Check if image already in build area by src
+      const imgs = buildArea.querySelectorAll('img');
+      for (const img of imgs) {
+        if (img.src === src) return; // Already added, ignore drop
+      }
+
+      // Remove from parts grid:
+      const partsImgs = imageGrid.querySelectorAll('img');
+      for (const img of partsImgs) {
+        if (img.src === src) {
+          img.parentElement.remove();
+          break;
+        }
+      }
+
+      // Add to build area container with label
+      const labelIndex = images.findIndex(name => src.endsWith(name));
+      const label = labelIndex !== -1 ? labels[labelIndex] : '';
+      const container = createImageContainer(src, label);
+
+      // Add removal on click in build area:
+      container.querySelector('img').style.cursor = 'pointer';
+      container.addEventListener('click', () => {
+        // Remove from build area
+        buildArea.removeChild(container);
+        // Add back to parts grid
+        imageGrid.appendChild(createImageContainer(src, label));
+      });
+
+      buildArea.appendChild(container);
     }
 
-    // Audio recording logic
+    // Build button handler - show final image replacing build area
+    buildBtn.addEventListener('click', () => {
+      buildArea.innerHTML = ''; // clear build area
+
+      const finalImg = document.createElement('img');
+      finalImg.src = '0000F.jpg'; // final completed image
+      finalImg.alt = 'Final Built Tin Foil Recorder';
+      finalImg.style.width = '300px';
+      finalImg.style.display = 'block';
+      finalImg.style.margin = '0 auto';
+
+      buildArea.appendChild(finalImg);
+    });
+
+    // Initialize parts grid on load
+    loadPartsGrid();
+
+    // Audio recording logic (unchanged)
     let mediaRecorder;
     let audioChunks = [];
 
@@ -183,3 +259,6 @@
 
 </body>
 </html>
+
+
+
