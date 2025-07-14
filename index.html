@@ -19,7 +19,7 @@
     .image-grid, .build-area {
       display: flex;
       flex-wrap: wrap;
-      gap: 15px;
+      gap: 10px;
       justify-content: center;
       margin-bottom: 30px;
       min-height: 150px;
@@ -28,10 +28,7 @@
       background: #fff;
     }
     .image-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100px;
+      text-align: center;
     }
     .image-item img {
       width: 100px;
@@ -39,8 +36,8 @@
       cursor: grab;
     }
     .image-item span {
+      display: block;
       margin-top: 4px;
-      font-size: 14px;
       font-weight: bold;
     }
     .audio-controls {
@@ -64,60 +61,7 @@
   </div>
 
   <h2 style="text-align:center;">Parts</h2>
-  <div class="image-grid" id="imageGrid">
-    <script>
-      const imageGrid = document.getElementById('imageGrid');
-      const imageList = [
-        { file: '0000A.jpg', label: 'A' },
-        { file: '0000B.jpg', label: 'B' },
-        { file: '0000C.jpg', label: 'C' },
-        { file: '0000D.jpg', label: 'D' },
-        { file: '00001.jpg', label: '1' },
-        { file: '00002.jpg', label: '2' },
-        { file: '00003.jpg', label: '3' },
-        { file: '00004.jpg', label: '4' },
-        { file: '00005.jpg', label: '5' },
-        { file: '00006.jpg', label: '6' },
-        { file: '00007.jpg', label: '7' },
-        { file: '00008.jpg', label: '8' },
-        { file: '00009.jpg', label: '9' },
-        { file: '00010.jpg', label: '10' },
-        { file: '00011.jpg', label: '11' },
-        { file: '00012.jpg', label: '12' },
-        { file: '00013.jpg', label: '13' },
-        { file: '00014.jpg', label: '14' },
-        { file: '00015.jpg', label: '15' },
-        { file: '00016.jpg', label: '16' },
-        { file: '00017.jpg', label: '17' },
-        { file: '00018.jpg', label: '18' },
-        { file: '00019.jpg', label: '19' },
-        { file: '00020.jpg', label: '20' },
-        { file: '00021.jpg', label: '21' },
-        { file: '00022.jpg', label: '22' },
-        { file: '00023.jpg', label: '23' },
-        { file: '0000E.jpg', label: 'E' },
-        { file: '0000F.jpg', label: 'F' }
-      ];
-
-      imageList.forEach(part => {
-        const item = document.createElement('div');
-        item.className = 'image-item';
-
-        const img = document.createElement('img');
-        img.src = part.file;
-        img.alt = 'Part ' + part.label;
-        img.draggable = true;
-        img.addEventListener('dragstart', dragStart);
-
-        const label = document.createElement('span');
-        label.textContent = part.label;
-
-        item.appendChild(img);
-        item.appendChild(label);
-        imageGrid.appendChild(item);
-      });
-    </script>
-  </div>
+  <div class="image-grid" id="imageGrid"></div>
 
   <h2 style="text-align:center;">Build Area</h2>
   <div class="build-area" id="buildArea" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
@@ -132,6 +76,58 @@
   </div>
 
   <script>
+    const imageList = [
+      { file: '0000A_.jpg', label: 'A' },
+      { file: '0000B.jpg', label: 'B' },
+      { file: '0000C.jpg', label: 'C' },
+      { file: '0000D_.jpg', label: 'D' },
+      { file: '00001.jpg', label: '1' },
+      { file: '00002.jpg', label: '2' },
+      { file: '00003.jpg', label: '3' },
+      { file: '00004.jpg', label: '4' },
+      { file: '00005.jpg', label: '5' },
+      { file: '00006.jpg', label: '6' },
+      { file: '00007.jpg', label: '7' },
+      { file: '00008.jpg', label: '8' },
+      { file: '00009.jpg', label: '9' },
+      { file: '00010.jpg', label: '10' },
+      { file: '00011.jpg', label: '11' },
+      { file: '00012.jpg', label: '12' },
+      { file: '00013.jpg', label: '13' },
+      { file: '00014.jpg', label: '14' },
+      { file: '00015.jpg', label: '15' },
+      { file: '00016.jpg', label: '16' },
+      { file: '00017.jpg', label: '17' },
+      { file: '00018.jpg', label: '18' },
+      { file: '00019.jpg', label: '19' },
+      { file: '00020.jpg', label: '20' },
+      { file: '00021.jpg', label: '21' },
+      { file: '00022.jpg', label: '22' },
+      { file: '00023.jpg', label: '23' },
+      { file: '0000E.jpg', label: 'E' },
+      { file: '0000F.jpg', label: 'F' }
+    ];
+
+    const imageGrid = document.getElementById('imageGrid');
+
+    imageList.forEach(({ file, label }) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'image-item';
+
+      const img = document.createElement('img');
+      img.src = file;
+      img.alt = 'Part ' + label;
+      img.draggable = true;
+      img.addEventListener('dragstart', dragStart);
+
+      const caption = document.createElement('span');
+      caption.textContent = label;
+
+      wrapper.appendChild(img);
+      wrapper.appendChild(caption);
+      imageGrid.appendChild(wrapper);
+    });
+
     function allowDrop(ev) {
       ev.preventDefault();
     }
@@ -187,4 +183,3 @@
 
 </body>
 </html>
-
