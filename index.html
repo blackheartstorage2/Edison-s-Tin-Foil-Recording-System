@@ -53,19 +53,7 @@
   </div>
 
   <h2 style="text-align:center;">Parts</h2>
-  <div class="image-grid" id="imageGrid">
-    <script>
-      for (let i = 1; i <= 21; i++) {
-        let img = document.createElement('img');
-        let num = String(i).padStart(5, '0'); // Pads 1 to 00001, 2 to 00002, etc.
-        img.src = num + '.jpg';                // Loads e.g. "00001.jpg" from same folder
-        img.alt = 'Part ' + num;
-        img.draggable = true;
-        img.addEventListener('dragstart', dragStart);
-        document.getElementById('imageGrid').appendChild(img);
-      }
-    </script>
-  </div>
+  <div class="image-grid" id="imageGrid"></div>
 
   <h2 style="text-align:center;">Build Area</h2>
   <div class="build-area" id="buildArea" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
@@ -80,6 +68,19 @@
   </div>
 
   <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const grid = document.getElementById('imageGrid');
+      for (let i = 1; i <= 21; i++) {
+        let img = document.createElement('img');
+        let num = String(i).padStart(5, '0'); // '00001' to '00021'
+        img.src = num + '.jpg';
+        img.alt = 'Part ' + num;
+        img.draggable = true;
+        img.addEventListener('dragstart', dragStart);
+        grid.appendChild(img);
+      }
+    });
+
     function allowDrop(ev) {
       ev.preventDefault();
     }
