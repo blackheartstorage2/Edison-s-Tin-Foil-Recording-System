@@ -42,6 +42,10 @@
       font-size: 16px;
       cursor: pointer;
     }
+    .disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -49,7 +53,7 @@
   <h1>Build Edison's Tin Foil Recorder</h1>
 
   <div class="instructions">
-    <p>Drag the parts from the grid below into the build area to assemble the device in the correct order (see your instructions). When complete, use the audio recorder below to simulate playback.</p>
+    <p>Drag the parts from the grid below into the build area to assemble the device. You must include the tin foil roll (Part 00023.jpg) to enable recording and playback. Once loaded, you may record and play audio with a vintage filter.</p>
   </div>
 
   <h2 style="text-align:center;">Parts</h2>
@@ -60,26 +64,29 @@
 
   <div class="audio-controls">
     <h2>Audio Recorder</h2>
-    <button onclick="startRecording()">Start Recording</button>
-    <button onclick="stopRecording()">Stop Recording</button>
-    <button onclick="playRecording()">Play Recording</button>
-    <p><small>(Browser must support MediaRecorder — use Chrome or Firefox)</small></p>
+    <button id="startBtn" onclick="startRecording()" class="disabled">Start Recording</button>
+    <button id="stopBtn" onclick="stopRecording()" class="disabled">Stop Recording</button>
+    <button id="playBtn" onclick="playRecording()" class="disabled">Play Recording</button>
+    <p><small>(Requires "tin foil roll" to be loaded — use Chrome or Firefox)</small></p>
     <audio id="audioPlayback" controls></audio>
   </div>
 
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const grid = document.getElementById('imageGrid');
-      for (let i = 1; i <= 21; i++) {
-        let img = document.createElement('img');
-        let num = String(i).padStart(5, '0'); // '00001' to '00021'
-        img.src = num + '.jpg';
-        img.alt = 'Part ' + num;
-        img.draggable = true;
-        img.addEventListener('dragstart', dragStart);
-        grid.appendChild(img);
-      }
-    });
+    const buildArea = document.getElementById('buildArea');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const playBtn = document.getElementById('playBtn');
+    let rollLoaded = false;
+
+    for (let i = 1; i <= 23; i++) {
+      const img = document.createElement('img');
+      const num = String(i).padStart(5, '0'); // 00001–00023
+      img.src = num + '.jpg';
+      img.alt = 'Part ' + num;
+      img.draggable = true;
+      img.addEventListener('dragstart', dragStart);
+      document.getElementById('imageGrid').appendChild(img);
+    }
 
     function allowDrop(ev) {
       ev.preventDefault();
@@ -95,14 +102,26 @@
       const img = document.createElement("img");
       img.src = src;
       img.style.width = "100px";
-      ev.target.appendChild(img);
+      buildArea.appendChild(img);
+
+      if (src.includes("00023.jpg") && !rollLoaded) {
+        rollLoaded = true;
+        enableAudioControls();
+      }
     }
 
-    // Audio recording logic
+    function enableAudioControls() {
+      startBtn.classList.remove("disabled");
+      stopBtn.classList.remove("disabled");
+      playBtn.classList.remove("disabled");
+    }
+
+    // Audio recording with vintage effect
     let mediaRecorder;
     let audioChunks = [];
 
     async function startRecording() {
+      if (!rollLoaded) return;
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorder = new MediaRecorder(stream);
       audioChunks = [];
@@ -131,8 +150,23 @@
     function playRecording() {
       const audio = document.getElementById('audioPlayback');
       audio.play();
+
+      // Optional: simulate grainy playback by reducing volume & boosting distortion
+      const context = new AudioContext();
+      const source = context.createMediaElementSource(audio);
+      const gain = context.createGain();
+      const biquadFilter = context.createBiquadFilter();
+
+      gain.gain.value = 0.9;
+      biquadFilter.type = "lowpass";
+      biquadFilter.frequency.value = 4000;
+
+      source.connect(biquadFilter);
+      biquadFilter.connect(gain);
+      gain.connect(context.destination);
     }
   </script>
 
 </body>
 </html>
+
